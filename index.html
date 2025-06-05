@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WHO'S LIVING IT RIGHT? - Interactive Game Show</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .game-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.9);
+            padding: 15px 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        
+        .progress-container {
+            flex: 1;
+            margin: 0 20px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .host-section {
+            background: rgba(255,255,255,0.95);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        
+        .host-section h2 {
+            color: #6366f1;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .scenario-card {
+            background: rgba(255,255,255,0.95);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        
+        .scenario-label {
+            font-weight: bold;
+            color: #6366f1;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .scenario-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .options-grid {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .option-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 25px;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .option-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .option-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .correct-highlight {
+            background: linear-gradient(135deg, #4CAF50, #8BC34A) !important;
+            transform: scale(1.02);
+        }
+        
+        .incorrect-highlight {
+            background: linear-gradient(135deg, #f44336, #ff7043) !important;
+        }
+        
+        .response-card {
+            background: rgba(255,255,255,0.95);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        
+        .response-header {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .correct .response-header {
+            color: #4CAF50;
+        }
+        
+        .incorrect .response-header {
+            color: #f44336;
+        }
+        
+        .response-insight {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #555;
+        }
+        
+        .navigation-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 0 10px;
+        }
+        
+        .nav-button {
+            background: rgba(255,255,255,0.9);
+            border: 2px solid #6366f1;
+            color: #6366f1;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            min-width: 120px;
+        }
+        
+        .nav-button:hover:not(:disabled) {
+            background: #6366f1;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .auto-advance-info {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        
+        .final-score-container {
+            background: rgba(255,255,255,0.95);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        
+        .final-score-container h2 {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            color: #6366f1;
+        }
+        
+        .score-display {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #666;
+        }
+        
+        .score-percentage {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        
+        .encouragement {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .restart-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 35px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .restart-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .game-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .progress-container {
+                margin: 0;
+                width: 100%;
+            }
+            
+            .navigation-controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🌟 WHO'S LIVING IT RIGHT? 🌟</h1>
+            <p>Test your wisdom about purposeful living!</p>
+        </div>
+        
+        <div class="game-stats">
+            <div id="roundCounter">Round 1 of 20</div>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar"></div>
+                </div>
+            </div>
+            <div id="scoreDisplay">Score: 0</div>
+        </div>
+        
+        <div id="game"></div>
+        
+        <div class="navigation-controls" id="navigationControls">
+            <button class="nav-button" id="prevButton" onclick="previousRound()" disabled>
+                ⬅️ Previous
+            </button>
+            <div class="auto-advance-info" id="autoAdvanceInfo" style="display: none;">
+                Auto-advancing in <span id="countdown">4</span>s...
+            </div>
+            <button class="nav-button" id="nextButton" onclick="nextRound()" disabled>
+                Next ➡️
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const gameRounds = [
+            {
+                scenario: "You're offered a high-paying job that requires 80-hour weeks, leaving little time for family and personal interests.",
+                options: [
+                    "Take the job - financial security is most important",
+                    "Negotiate for better work-life balance before accepting",
+                    "Decline and look for something more sustainable",
+                    "Take it temporarily to build experience, then move on"
+                ],
+                correct: 1,
+                insight: "True success includes both financial stability and personal fulfillment. Negotiating shows you value yourself and your relationships while being practical about career growth."
+            },
+            {
+                scenario: "A friend constantly complains but never takes your advice or makes changes to improve their situation.",
+                options: [
+                    "Continue listening and supporting them unconditionally",
+                    "Give them an ultimatum to change or lose your friendship",
+                    "Set boundaries while offering support for positive action",
+                    "Gradually distance yourself without explanation"
+                ],
+                correct: 2,
+                insight: "Healthy relationships require boundaries. Supporting someone doesn't mean enabling their patterns. Encouraging positive action while protecting your own well-being shows wisdom and compassion."
+            },
+            {
+                scenario: "You discover your company is using questionable practices that boost profits but harm the environment.",
+                options: [
+                    "Stay quiet to protect your job security",
+                    "Immediately quit and find new employment",
+                    "Document the issues and report through proper channels",
+                    "Confront your boss directly and demand changes"
+                ],
+                correct: 2,
+                insight: "Living with integrity means taking measured action when you encounter wrongdoing. Documenting and reporting through proper channels protects you while addressing the real issues responsibly."
+            },
+            {
+                scenario: "Your teenager wants to quit their part-time job to focus on a creative passion with uncertain income potential.",
+                options: [
+                    "Insist they keep the job for financial responsibility",
+                    "Let them quit if they're truly passionate about their art",
+                    "Help them create a plan that balances both interests",
+                    "Give them a deadline to show profitable results"
+                ],
+                correct: 2,
+                insight: "Supporting dreams while teaching practical skills creates the best foundation. Helping them balance both shows them how to pursue passion responsibly - a crucial life skill."
+            },
+            {
+                scenario: "You've been invited to an event where you know there will be people who've hurt you in the past.",
+                options: [
+                    "Skip the event to avoid potential drama",
+                    "Go and pretend nothing happened",
+                    "Attend but prepare mentally and have an exit strategy",
+                    "Go and use it as an opportunity to address past issues"
+                ],
+                correct: 2,
+                insight: "Growth comes from facing difficult situations while protecting your peace. Being prepared mentally and having boundaries shows you're healing while still engaging with life fully."
+            },
+            {
+                scenario: "A family member asks to borrow a significant amount of money for the third time, having not repaid previous loans.",
+                options: [
+                    "Lend the money because family should always help family",
+                    "Refuse and explain you can't afford to lose more money",
+                    "Offer non-monetary support instead",
+                    "Lend it but create a formal agreement with terms"
+                ],
+                correct: 2,
+                insight: "True help sometimes means not enabling financial dependence. Offering other forms of support shows love while encouraging them to develop better money management skills."
+            },
+            {
+                scenario: "You're in a relationship where you're constantly giving more than you receive emotionally.",
+                options: [
+                    "Accept that this is just how relationships work sometimes",
+                    "Give an ultimatum for them to change immediately",
+                    "Communicate your needs clearly and honestly",
+                    "Start pulling back to match their level of investment"
+                ],
+                correct: 2,
+                insight: "Healthy relationships require honest communication about needs. Speaking up gives your partner a chance to grow and shows you value yourself enough to ask for what you need."
+            },
+            {
+                scenario: "You have a chance to take credit for work that was partially done by others.",
+                options: [
+                    "Take full credit since you managed the project",
+                    "Give credit to everyone who contributed",
+                    "Downplay your own contributions to seem humble",
+                    "Take credit now and acknowledge others later privately"
+                ],
+                correct: 1,
+                insight: "Integrity shines brightest when no one is watching. Sharing credit builds trust, strengthens relationships, and creates a positive reputation that serves you far better than stolen recognition."
+            },
+            {
+                scenario: "Your dream vacation conflicts with a family member's wedding that you're not particularly close to.",
+                options: [
+                    "Skip the wedding and take your vacation",
+                    "Cancel your vacation and attend the wedding",
+                    "Try to reschedule your vacation if possible",
+                    "Attend the wedding but leave early for vacation"
+                ],
+                correct: 2,
+                insight: "Thoughtful people look for creative solutions that honor both personal desires and family connections. Making an effort to accommodate both shows maturity and caring for relationships."
+            },
+            {
+                scenario: "You witness a colleague taking supplies from work for personal use.",
+                options: [
+                    "Report them to management immediately",
+                    "Ignore it since it's not your business",
+                    "Speak to them privately first",
+                    "Start taking supplies yourself since everyone else does it"
+                ],
+                correct: 2,
+                insight: "Direct, private communication often resolves issues while preserving dignity and relationships. It gives people a chance to correct their behavior and shows you care about their reputation."
+            },
+            {
+                scenario: "Your child's teacher requests a meeting about behavioral issues you haven't noticed at home.",
+                options: [
+                    "Assume the teacher is wrong and defend your child",
+                    "Immediately punish your child for the school behavior",
+                    "Listen to the teacher and investigate the situation thoroughly",
+                    "Blame the teacher for not managing the classroom properly"
+                ],
+                correct: 2,
+                insight: "Good parenting means staying curious and open to new information. Children often behave differently in different environments, and investigating helps you understand and support them better."
+            },
+            {
+                scenario: "You're offered a chance to invest in a friend's business venture that seems risky.",
+                options: [
+                    "Invest to show your support for their dreams",
+                    "Decline and risk potentially hurting the friendship",
+                    "Do thorough research before making any decision",
+                    "Invest a small amount you can afford to lose"
+                ],
+                correct: 2,
+                insight: "Wise decisions require good information. True friendship can handle honest business discussions, and thorough research protects both your finances and the relationship long-term."
+            },
+            {
+                scenario: "You receive a job performance review that contains some fair criticism alongside praise.",
+                options: [
+                    "Focus on the positive feedback and ignore the criticism",
+                    "Feel defensive and argue against the negative points",
+                    "Thank them and ask for specific guidance on improvement",
+                    "Assume you're not valued and start looking for another job"
+                ],
+                correct: 2,
+                insight: "Growth mindset turns feedback into opportunity. Asking for specific guidance shows professionalism and genuine desire to improve, which usually leads to better relationships and career advancement."
+            },
+            {
+                scenario: "Your elderly parent is showing signs of needing more help but insists they're fine living alone.",
+                options: [
+                    "Respect their independence and wait for them to ask for help",
+                    "Immediately move them to assisted living for their safety",
+                    "Have an honest conversation about your concerns and explore options together",
+                    "Secretly arrange for help without telling them"
+                ],
+                correct: 2,
+                insight: "Honoring someone's dignity while addressing safety concerns requires open communication. Exploring options together respects their autonomy while ensuring their needs are met."
+            },
+            {
+                scenario: "A social media post from a friend contains information you know is completely false and potentially harmful.",
+                options: [
+                    "Publicly correct them in the comments",
+                    "Ignore it to avoid confrontation",
+                    "Send them a private message with accurate information",
+                    "Share a post with correct information without mentioning them"
+                ],
+                correct: 2,
+                insight: "Private correction preserves dignity while addressing misinformation. This approach is more likely to be received well and actually change their mind rather than making them defensive."
+            },
+            {
+                scenario: "You're planning a major life change (career, location, relationship) that your family strongly opposes.",
+                options: [
+                    "Abandon your plans to keep family peace",
+                    "Proceed without discussing it further with them",
+                    "Take time to understand their concerns while staying true to your vision",
+                    "Do what you want and let them adjust later"
+                ],
+                correct: 2,
+                insight: "Wisdom balances personal authenticity with family relationships. Understanding their concerns doesn't mean you have to follow their advice, but it shows respect and might reveal helpful insights."
+            },
+            {
+                scenario: "You discover a friend's partner is being unfaithful to them.",
+                options: [
+                    "Tell your friend immediately",
+                    "Confront the cheating partner first",
+                    "Stay out of it completely",
+                    "Gather more evidence before deciding what to do"
+                ],
+                correct: 1,
+                insight: "True friendship sometimes requires difficult conversations. Your friend deserves to know the truth about their relationship so they can make informed decisions about their life and health."
+            },
+            {
+                scenario: "You're in a group project where one person isn't contributing their fair share.",
+                options: [
+                    "Do their work yourself to ensure project success",
+                    "Complain to the instructor about the team member",
+                    "Address it directly with the person first",
+                    "Document everything and let the project fail if necessary"
+                ],
+                correct: 2,
+                insight: "Direct communication often solves problems and teaches valuable life skills. People sometimes don't realize their impact on others, and addressing it directly gives them a chance to improve."
+            },
+            {
+                scenario: "Your community has an opportunity to vote on an issue that would benefit you personally but might not be best for the community overall.",
+                options: [
+                    "Vote for your personal benefit - everyone else will too",
+                    "Vote against your interests for the greater good",
+                    "Research thoroughly and vote based on overall community impact",
+                    "Abstain from voting to avoid the moral dilemma"
+                ],
+                correct: 2,
+                insight: "Ethical decision-making requires looking beyond immediate self-interest. Thorough research helps you make decisions that serve both personal values and community well-being."
+            },
+            {
+                scenario: "You have the opportunity to learn a new skill that interests you, but it would require sacrificing some leisure time.",
+                options: [
+                    "Skip it - you work hard and deserve your free time",
+                    "Dive in completely and give up all leisure activities",
+                    "Find a balanced approach that includes both learning and relaxation",
+                    "Wait until you have more time available"
+                ],
+                correct: 2,
+                insight: "Personal growth and self-care both matter for a fulfilling life. Finding balance ensures you develop new skills while maintaining your mental health and other important aspects of life."
+            }
+        ];
+
+        let currentRound = 0;
+        let score = 0;
+        let userAnswers = []; // Track user answers
+        let hasAnswered = false;
+        let autoAdvanceTimer = null;
+
+        function updateStats() {
+            document.getElementById("roundCounter").innerText = `Round ${currentRound + 1} of ${gameRounds.length}`;
+            document.getElementById("scoreDisplay").innerText = `Score: ${score}`;
+            document.getElementById("progressBar").style.width = `${((currentRound) / gameRounds.length) * 100}%`;
+        }
+
+        function updateNavigationButtons() {
+            const prevButton = document.getElementById("prevButton");
+            const nextButton = document.getElementById("nextButton");
+            
+            prevButton.disabled = currentRound === 0;
+            nextButton.disabled = !hasAnswered || currentRound >= gameRounds.length - 1;
+        }
+
+        function renderRound() {
+            const round = gameRounds[currentRound];
+            const container = document.getElementById("game");
+            hasAnswered = userAnswers[currentRound] !== undefined;
+            
+            updateStats();
+            
+            container.innerHTML = `
+                <div class="host-section">
+                    <h2>🎤 Hello Masters </h2>
+                    <p>Choose the wisest approach to this life situation!</p>
+                </div>
+                <div class="scenario-card">
+                    <div class="scenario-label">Scenario:</div>
+                    <div class="scenario-text">${round.scenario}</div>
+                </div>
+                <div class="options-grid">
+                    ${round.options.map((opt, i) => `
+                        <button class="option-button ${getOptionClass(i)}" 
+                                onclick="submitAnswer(${i}, this)" 
+                                ${hasAnswered ? 'disabled' : ''}>
+                            ${opt}
+                        </button>
+                    `).join('')}
+                </div>
+                <div id="response">${hasAnswered ? getResponseHTML(userAnswers[currentRound]) : ''}</div>
+            `;
+            
+            updateNavigationButtons();
+            clearAutoAdvanceTimer();
+        }
+
+        function getOptionClass(optionIndex) {
+            if (!hasAnswered) return '';
+            
+            const round = gameRounds[currentRound];
+            const userChoice = userAnswers[currentRound];
+            
+            if (optionIndex === round.correct) {
+                return 'correct-highlight';
+            } else if (optionIndex === userChoice) {
+                return 'incorrect-highlight';
+            }
+            return '';
+        }
+
+        function getResponseHTML(userChoice) {
+            const round = gameRounds[currentRound];
+            const isCorrect = userChoice === round.correct;
+            
+            return `
+                <div class="response-card ${isCorrect ? 'correct' : 'incorrect'}">
+                    <div class="response-header">${isCorrect ? '✅ Great choice!' : '❌ Hmm… not quite.'}</div>
+                    <div class="response-insight">${round.insight}</div>
+                </div>
+            `;
+        }
+
+        function submitAnswer(choice, btn) {
+            if (hasAnswered) return;
+            
+            const round = gameRounds[currentRound];
+            const response = document.getElementById("response");
+            const buttons = document.querySelectorAll('.option-button');
+            
+            // Record the answer
+            userAnswers[currentRound] = choice;
+            hasAnswered = true;
+            
+            // Update score
+            if (choice === round.correct) {
+                score++;
+                updateStats();
+            }
+            
+            // Disable all buttons and highlight
+            buttons.forEach((b, i) => {
+                b.disabled = true;
+                if (i === round.correct) {
+                    b.classList.add('correct-highlight');
+                } else if (i === choice) {
+                    b.classList.add('incorrect-highlight');
+                }
+            });
+            
+            // Show response
+            response.innerHTML = getResponseHTML(choice);
+            
+            updateNavigationButtons();
+            
+            // Auto-advance to next round if not on last round
+            if (currentRound < gameRounds.length - 1) {
+                startAutoAdvance();
+            } else {
+                // Show final results after delay
+                setTimeout(showFinalResults, 10000);
+            }
+        }
+
+        function startAutoAdvance() {
+            const autoAdvanceInfo = document.getElementById("autoAdvanceInfo");
+            const countdown = document.getElementById("countdown");
+            let timeLeft = 4;
+            
+            autoAdvanceInfo.style.display = 'block';
+            countdown.textContent = timeLeft;
+            
+            autoAdvanceTimer = setInterval(() => {
+                timeLeft--;
+                countdown.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearAutoAdvanceTimer();
+                    nextRound();
+                }
+            }, 1000);
+        }
+
+        function clearAutoAdvanceTimer() {
+            if (autoAdvanceTimer) {
+                clearInterval(autoAdvanceTimer);
+                autoAdvanceTimer = null;
+            }
+            document.getElementById("autoAdvanceInfo").style.display = 'none';
+        }
+
+        function nextRound() {
+            clearAutoAdvanceTimer();
+            if (currentRound < gameRounds.length - 1) {
+                currentRound++;
+                renderRound();
+            }
+        }
+
+        function previousRound() {
+            clearAutoAdvanceTimer();
+            if (currentRound > 0) {
+                currentRound--;
+                renderRound();
+            }
+        }
+
+        function showFinalResults() {
+            clearAutoAdvanceTimer();
+            const percent = Math.round((score / gameRounds.length) * 100);
+            let title = "🧘 Balanced Soul";
+            
+            if (percent >= 90) title = "🌟 Enlightened Guide";
+            else if (percent >= 70) title = "🌿 Wise Navigator";
+            else if (percent < 50) title = "🌱 Spiritual Explorer";
+            
+            document.getElementById("game").innerHTML = `
+                <div class="final-score-container">
+                    <h2>🎉 Game Complete!</h2>
+                    <div class="score-display">You scored</div>
+                    <div class="score-percentage">${percent}%</div>
+                    <div class="encouragement">${title}<br>Keep practicing purpose-driven living!</div>
+                    <button class="restart-button" onclick="restartGame()">🔄 Play Again</button>
+                </div>
+            `;
+            
+            document.getElementById("navigationControls").style.display = 'none';
+        }
+
+        function restartGame() {
+            currentRound = 0;
+            score = 0;
+            userAnswers = [];
+            hasAnswered = false;
+            clearAutoAdvanceTimer();
+            document.getElementById("navigationControls").style.display = 'flex';
+            renderRound();
+        }
+
+        window.onload = () => {
+            renderRound();
+        };
+    </script>
+</body>
+</html>
